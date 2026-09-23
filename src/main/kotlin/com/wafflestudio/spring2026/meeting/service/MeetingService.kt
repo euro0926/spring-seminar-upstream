@@ -12,13 +12,38 @@ class MeetingService(
     fun createMeeting(
         title: String,
         capacity: Int,
-    ): Meeting =
-        meetingRepository.save(
-            title = title,
-            capacity = capacity,
-        )
+    ): Meeting = meetingRepository.save(title, capacity)
 
     fun getMeeting(id: Long): Meeting =
-        meetingRepository.findById(id)
-            ?: throw MeetingNotFoundException(id)
+        meetingRepository.findById(id) ?: throw MeetingNotFoundException(id)
+
+    fun getAllMeetings(): List<Meeting> = meetingRepository.findAll()
+
+    fun updateMeeting(
+        id: Long,
+        title: String?,
+        capacity: Int?,
+    ): Meeting {
+        val meeting = getMeeting(id)
+
+        title?.let {
+            if (it.isBlank()) {
+                throw IllegalArgumentException("모임 제목은 비어 있을 수 없습니다.")
+            }
+            meeting.title = it
+        }
+
+        capacity?.let {
+            meeting.capacity = it
+        }
+
+        return meeting
+    }
+
+    fun deleteMeeting(id: Long) {
+        val isDeleted = meetingRepository.deleteById(id)
+        if (!isDeleted) {
+            throw MeetingNotFoundException(id)
+        }
+    }
 }
